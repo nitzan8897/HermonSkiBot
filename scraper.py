@@ -1,6 +1,7 @@
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -11,13 +12,16 @@ from config import HERMON_URL, NO_TICKETS_TEXT
 def get_driver():
     """Create a headless Chrome driver."""
     options = Options()
+    options.binary_location = "/usr/bin/google-chrome"
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
-    options.add_argument("--remote-debugging-port=9222")
-    return webdriver.Chrome(options=options)
+    options.add_argument("--window-size=1920,1080")
+
+    service = Service()
+    return webdriver.Chrome(service=service, options=options)
 
 
 def check_hermon_tickets():
