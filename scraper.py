@@ -3,10 +3,15 @@ import random
 import string
 from datetime import datetime
 
+from config import PROXY_URL
+
 API_URL = "https://hermon.presglobal.store/api/system-vouchers/byDate"
 
 # Ski ticket voucher IDs
 SKI_VOUCHER_IDS = {77, 80}
+
+# Set up proxy if configured
+PROXIES = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
 
 
 def generate_random_token(length=32):
@@ -19,7 +24,7 @@ def check_hermon_tickets():
     try:
         token = generate_random_token()
         url = f"{API_URL}?recaptchaToken={token}"
-        response = requests.get(url, timeout=30)
+        response = requests.get(url, timeout=30, proxies=PROXIES)
         response.raise_for_status()
         data = response.json()
 
