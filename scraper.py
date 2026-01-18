@@ -1,7 +1,5 @@
 import time
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+import undetected_chromedriver as uc
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -10,18 +8,15 @@ from config import HERMON_URL, NO_TICKETS_TEXT
 
 
 def get_driver():
-    """Create a headless Chrome driver."""
-    options = Options()
-    options.binary_location = "/usr/bin/google-chrome"
+    """Create an undetected Chrome driver."""
+    options = uc.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--disable-software-rasterizer")
     options.add_argument("--window-size=1920,1080")
 
-    service = Service()
-    return webdriver.Chrome(service=service, options=options)
+    return uc.Chrome(options=options, browser_executable_path="/usr/bin/google-chrome")
 
 
 def check_hermon_tickets():
@@ -39,7 +34,6 @@ def check_hermon_tickets():
         # Give extra time for dynamic content to load
         time.sleep(5)
 
-        page_text = driver.page_source
         page_body = driver.find_element(By.TAG_NAME, "body").text
         print("Page loaded, checking for tickets...")
         print(f"Page body text (first 500 chars): {page_body[:500]}")
