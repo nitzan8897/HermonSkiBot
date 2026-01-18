@@ -1,5 +1,6 @@
 import time
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -8,15 +9,13 @@ from config import HERMON_URL, NO_TICKETS_TEXT
 
 
 def get_driver():
-    """Create an undetected Chrome driver."""
-    options = uc.ChromeOptions()
-    options.add_argument("--headless=new")
+    """Create a headless Chrome driver."""
+    options = Options()
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-
-    return uc.Chrome(options=options, browser_executable_path="/usr/bin/google-chrome")
+    return webdriver.Chrome(options=options)
 
 
 def check_hermon_tickets():
@@ -34,15 +33,12 @@ def check_hermon_tickets():
         # Give extra time for dynamic content to load
         time.sleep(5)
 
-        page_body = driver.find_element(By.TAG_NAME, "body").text
+        page_text = driver.page_source
         print("Page loaded, checking for tickets...")
-        print(f"Page body text (first 500 chars): {page_body[:500]}")
 
-        if NO_TICKETS_TEXT in page_body:
+        if NO_TICKETS_TEXT in page_text:
             return False  # No tickets available
         else:
-            print(f"Looking for: '{NO_TICKETS_TEXT}'")
-            print(f"Not found in page body")
             return True   # Tickets might be available!
 
     except Exception as e:
