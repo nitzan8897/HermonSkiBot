@@ -40,11 +40,15 @@ def check_hermon_tickets():
         time.sleep(5)
 
         page_text = driver.page_source
+        page_body = driver.find_element(By.TAG_NAME, "body").text
         print("Page loaded, checking for tickets...")
+        print(f"Page body text (first 500 chars): {page_body[:500]}")
 
-        if NO_TICKETS_TEXT in page_text:
+        if NO_TICKETS_TEXT in page_body:
             return False  # No tickets available
         else:
+            print(f"Looking for: '{NO_TICKETS_TEXT}'")
+            print(f"Not found in page body")
             return True   # Tickets might be available!
 
     except Exception as e:
