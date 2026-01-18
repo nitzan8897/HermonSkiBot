@@ -33,7 +33,8 @@ async def status_command(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     if tickets_available is None:
         await update.message.reply_text("שגיאה בבדיקה, נסה שוב")
     elif tickets_available:
-        await update.message.reply_text(f"פתוח!!!!!, רוץ לקנות כרטיס\n{HERMON_URL}")
+        dates_str = ", ".join(d.strftime("%d/%m/%Y") for d in tickets_available)
+        await update.message.reply_text(f"פתוח!!!! רוץ לקנות {HERMON_URL}\nמצאתי סקי-פסים בתאריכים:\n{dates_str}")
     else:
         await update.message.reply_text("סגור :(")
 

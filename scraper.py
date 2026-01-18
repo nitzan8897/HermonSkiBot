@@ -1,49 +1,62 @@
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+import requests
+import random
+import string
+from datetime import datetime
 
-from config import HERMON_URL, NO_TICKETS_TEXT
+API_URL = "https://hermon.presglobal.store/api/system-vouchers/byDate"
+
+# Ski ticket voucher IDs
+SKI_VOUCHER_IDS = {77, 80}
 
 
-def get_driver():
-    """Create a headless Chrome driver."""
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    return webdriver.Chrome(options=options)
+def generate_random_token(length=32):
+    """Generate a random recaptcha token."""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 def check_hermon_tickets():
-    """Check if tickets are available on the Hermon website."""
-    driver = None
+    """Check if ski tickets are available via the API."""
     try:
-        driver = get_driver()
-        driver.get(HERMON_URL)
+        token = generate_random_token()
+        url = f"{API_URL}?recaptchaToken={token}"
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        data = response.json()
 
-        # Wait for page to load (wait up to 15 seconds for body to be present)
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
+        print("API response received, checking vouchers...")
 
-        # Give extra time for dynamic content to load
-        time.sleep(5)
+        today = datetime.now().date()
+        dates = data.get("Dates", [])
+        found_dates = []
 
-        page_text = driver.page_source
-        print("Page loaded, checking for tickets...")
+        for date_entry in dates:
+            date_str = date_entry.get("Date", "")
+            # Parse the date (format: "2025-01-19T00:00:00")
+            try:
+                entry_date = datetime.fromisoformat(date_str.replace("Z", "")).date()
+            except ValueError:
+                continue
 
-        if NO_TICKETS_TEXT in page_text:
-            return False  # No tickets available
-        else:
-            return True   # Tickets might be available!
+            # Only check future dates
+            if entry_date < today:
+                continue
 
-    except Exception as e:
-        print(f"Error checking website: {e}")
+            vouchers = date_entry.get("Vouchers", [])
+            for voucher in vouchers:
+                voucher_id = voucher.get("SystemVoucherId")
+                voucher_name = voucher.get("Name", "Unknown")
+
+                if voucher_id in SKI_VOUCHER_IDS:
+                    print(f"SKI TICKET FOUND! Date: {entry_date}, Voucher ID: {voucher_id} - {voucher_name}")
+                    if entry_date not in found_dates:
+                        found_dates.append(entry_date)
+
+        if found_dates:
+            return found_dates
+
+        print("No ski tickets found in future dates (looking for IDs 77, 80)")
+        return False
+
+    except requests.RequestException as e:
+        print(f"Error checking API: {e}")
         return None
-    finally:
-        if driver:
-            driver.quit()

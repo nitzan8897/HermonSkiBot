@@ -15,11 +15,12 @@ def run_periodic_check():
         if tickets_available is None:
             print("Could not check website, will retry...")
         elif tickets_available:
-            message = f"פתוח!!!!!, רוץ לקנות כרטיס\n{HERMON_URL}"
+            dates_str = ", ".join(d.strftime("%d/%m/%Y") for d in tickets_available)
+            message = f"פתוח!!!! רוץ לקנות {HERMON_URL}\nמצאתי סקי-פסים בתאריכים:\n{dates_str}"
             send_telegram_message(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, message)
             print("TICKETS AVAILABLE! Alert sent.")
         else:
-            print("No tickets yet - 'לא נמצאו שוברים למכירה'")
+            print("No tickets yet")
 
         time.sleep(CHECK_INTERVAL)
 
