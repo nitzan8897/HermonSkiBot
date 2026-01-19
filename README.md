@@ -1,3 +1,8 @@
+# Todos
+- Make Railway use Shachar's proxy and send the HTTP request.
+
+Currently the last commit isn't working because proxy problems so we work with the recent local development commit.
+
 # Hermon Ski Alert Bot
 
 A Telegram bot that monitors the Hermon ski resort ticket page and alerts you when skiing tickets become available.
